@@ -14,18 +14,20 @@
     <div class="container">
         <h1>{{  header1  }}</h1>
     </div>
-    <form name="dt" action="/cgi_bin/userdata.cgi" method="post">
-        <div class="col-12">
-            <p>Задайте дату и время начала мониторинга:</p>
-            <p>dt_start: <input type="datetime-local" value="dt_start_html" id="dt_start" name="dt_start" /></p>
-            <p>Задайте дату и время окончания мониторинга:</p>   
-            <p><input type="datetime-local" value="dt_finish" id="dt_finish" name="dt_finish" /></p>
-            <p>
-                <button name="dt_forward" type="submit">Отправить</button>
-            </p>
-        </div>
-    </form>
-  
+    <div class="col-12">
+      <form action="{{ url_for('process_dt')}}" method="POST">
+        {{ form.hidden_tag() }}
+        <p>
+          {{ form.dt_start.label }}<br>
+          <input type="datetime-local" id="dt_start" name="dt_start">
+        </p>
+        <p>
+          {{ form.dt_finish.label }}<br>
+          <input type="datetime-local" id="dt_finish" name="dt_finish">
+        </p>
+        <p>{{ form.submit() }}</p>
+      </form>
+    </div>
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->

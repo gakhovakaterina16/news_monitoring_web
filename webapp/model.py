@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from webapp.forms import dtForm
 
 db = SQLAlchemy()
 
@@ -8,4 +9,5 @@ class UserDT(db.Model):
     dt_finish = db.Column(db.DateTime, nullable=False)
 
     def __repr__(self):
-        return '<UserDT {}>'.format(self.username)
+        return '<UserDT {} {}>'.format(self.dt_start, self.dt_finish)
+

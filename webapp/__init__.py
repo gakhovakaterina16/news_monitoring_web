@@ -4,6 +4,8 @@ from webapp.forms import dtForm
 
 from webapp.model import db, UserDT
 
+from datetime import datetime
+
 def create_app():
     app = Flask(__name__)
     app.config.from_pyfile("config.py")
@@ -20,8 +22,11 @@ def create_app():
     def process_dt():
         form = dtForm()
         if form.validate_on_submit:
-            dt_start = UserDT.query.filter_by(dt_start=form.dt_start.data).first()
-            dt_finish = UserDT.query.filter_by(dt_finish=form.dt_finish.data).first()
+            dt_start_enter = datetime.strptime(form.dt_start.raw_data[0],"%Y-%m-%dT%H:%M")
+            dt_finish_enter = datetime.strptime(form.dt_finish.raw_data[0],"%Y-%m-%dT%H:%M")
+            dt_enter = UserDT(dt_start=dt_start_enter, dt_finish=dt_finish_enter)
+            db.session.add(dt_enter)
+            db.session.commit()
             return redirect(url_for("start_page"))
 
     return app

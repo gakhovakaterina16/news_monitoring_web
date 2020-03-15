@@ -1,4 +1,8 @@
-from datetime import datetime
+'''
+Это черновик для функций запросов
+'''
+
+from datetime import datetime, timedelta
 from pymongo import MongoClient
 from pprint import pprint
 import requests
@@ -12,7 +16,7 @@ def get_data(latitude, longitude):
                                 "radius": 5,
                                 "tariff_group": [ 4, 5, 6 ],
                                 "ver": "4.33.0"})
-    return eval(response.text)
+    return eval(response.text)['drivers']
 
 if __name__ == '__main__':
 
@@ -30,6 +34,8 @@ if __name__ == '__main__':
     #db = client.test_taxi_data
     #drivers = db.drivers
     
+
+    '''
     data = get_data(latitude, longitude)['drivers']
     driver_ids_in_DB = []
     drivers_data = []
@@ -50,8 +56,17 @@ if __name__ == '__main__':
                 pass
         elif driver['id'] in driver_ids_in_DB:
             pass
-
+    '''
         
 
     #drivers.insert_many(data)
-    pprint(drivers_data)
+    #data = get_data(latitude, longitude)
+    #pprint(data)
+
+    current_date = datetime.now()
+    period = timedelta(weeks=1)
+    out_of_date = current_date - period
+
+    print(current_date)
+    print(period)
+    print(out_of_date)

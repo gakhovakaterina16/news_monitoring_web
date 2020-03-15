@@ -79,6 +79,7 @@ def form_DB(min_lattitude, min_longitude, max_lattitude, max_longitude):
             data = get_data(lat, lon) # получаем список словарей
             # Проверяем, есть ли уже в БД запись с id и находится ли в пределах города
             for driver in data:
+                # если водителя с id нет в базе, то добавляем его данные
                 if driver['id'] not in driver_ids_in_DB and ((min_latitude < driver['lt'] < max_latitude) or (min_longitude < driver['ln'] < max_longitude)):
                     # добавляем id в список появившихся
                     driver_ids_in_DB.append(driver['id'])
@@ -87,13 +88,17 @@ def form_DB(min_lattitude, min_longitude, max_lattitude, max_longitude):
                     driver_data['driver_id'] =  driver['id']
                     driver_data['color'] =  driver['CarColorCode']
                     driver_data['direction'] =  driver['direction']
+                    driver_data['car_type'] = driver['car_type']
                     driver_data['posts'] = []
                     post = {datetime.strftime(datetime.now(), '%d %m %Y %H:%M:%S'): {'lt':driver['lt'], 'ln':driver['ln']}}
                     driver_data['posts'].append(post)
                     db.drivers.insert_one(driver_data)
+                # если водитель с id есть в базе, то добавляем его координаты и время
                 elif driver['id'] in driver_ids_in_DB and ((min_latitude < driver['lt'] < max_latitude) or (min_longitude < driver['ln'] < max_longitude)):
                     post = {datetime.strftime(datetime.now(), '%d %m %Y %H:%M:%S'): {'lt':driver['lt'], 'ln':driver['ln']}}
-                    db.drivers.driver['id'].posts.insert_one(post)
+                    #!!!!!!!!
+                    db.drivers.update({"driver_id": driver['id']}, {$push: {"posts": post}})
+                    #!!!!!!!!!!!!
                 
                 
     # Удаляем устаревшие данные

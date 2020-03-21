@@ -9,6 +9,18 @@ import requests
 
 def get_data(latitude, longitude):
     response = requests.post('https://c-api.city-mobil.ru/getdrivers',
+                        json={ "latitude": latitude,
+                                "longitude": longitude,
+                                "limit": 100,
+                                "method": "getdrivers",
+                                "radius": 5,
+                                "tariff_group": [ 4, 5, 6 ],
+                                "ver": "4.33.0"})
+    return eval(response.text)
+
+'''
+def get_data(latitude, longitude):
+    response = requests.post('https://c-api.city-mobil.ru/getdrivers',
                         json={  "latitude": latitude,
                                 "longitude": longitude,
                                 "limit": 100,
@@ -17,6 +29,7 @@ def get_data(latitude, longitude):
                                 "tariff_group": [ 4, 5, 6 ],
                                 "ver": "4.33.0"})
     return eval(response.text)['drivers']
+'''
 
 if __name__ == '__main__':
 
@@ -35,7 +48,7 @@ if __name__ == '__main__':
     #drivers = db.drivers
     
 
-    
+    '''
     data = get_data(latitude, longitude)
     driver_ids_in_DB = []
     drivers_data = []
@@ -57,8 +70,10 @@ if __name__ == '__main__':
             post = {datetime.strftime(datetime.now(), '%d %m %Y %H:%M:%S'): {'lt':driver['lt'], 'ln':driver['ln']}}
             driver_data['posts'].append(post)
 
-    
+    '''
         
+
+    drivers_data = get_data(latitude, longitude)
 
     #drivers.insert_many(data)
     pprint(drivers_data)

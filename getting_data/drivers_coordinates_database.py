@@ -97,7 +97,7 @@ def form_DB(min_lattitude, min_longitude, max_lattitude, max_longitude):
                 elif driver['id'] in driver_ids_in_DB and ((min_latitude < driver['lt'] < max_latitude) or (min_longitude < driver['ln'] < max_longitude)):
                     post = {datetime.strftime(datetime.now(), '%d %m %Y %H:%M:%S'): {'lt':driver['lt'], 'ln':driver['ln']}}
                     #!!!!!!!!
-                    db.drivers.update({"driver_id": driver['id']}, {$push: {"posts": post}})
+                    db.drivers.update({"driver_id": driver['id']}, {"$push": {"posts": post}})
                     #!!!!!!!!!!!!
                 
                 
@@ -119,7 +119,10 @@ if __name__ == "__main__":
 
     #form_DB(min_latitude, min_longitude, max_latitude, max_longitude)
 
+    i = 0
     while True:
+        i += 1
+        print(i)
         form_DB(min_latitude, min_longitude, max_latitude, max_longitude)
 
     

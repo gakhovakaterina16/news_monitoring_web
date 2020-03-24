@@ -1,8 +1,8 @@
 from flask import Flask, render_template, flash, redirect, url_for, request, jsonify
 
-from webapp.forms import dtForm
+from webapp.forms import dtForm, coordinatesForm
 
-from webapp.model import db, UserDT
+from webapp.model import db, UserDT, UserCoordinates
 
 from datetime import datetime
 
@@ -15,8 +15,8 @@ def create_app():
 
     @app.route("/")
     def start_page():
-        title = "Отслеживание машин"
-        header1 = "Отслеживание машин Ситимобил в указанной локации"
+        title = "Новости"
+        header1 = "Отслеживание новостей в указанной локации"
         dt_form = dtForm()
         return render_template("index.html", page_title=title, header1=header1, form=dt_form)
        
@@ -31,6 +31,17 @@ def create_app():
             db.session.commit()     
             return redirect(url_for("start_page"))
     
+    @app.route("/process_coordinates", methods=["POST"])
+    def process_coordinates():
+        form = coordinatesForm()
+        if form.validate_on_submit:
+            latitude_enter = form.latitude.raw_data[0]
+            longitude_enter = form.longitude.raw_data[0]
+            coordinates_enter = UserCoordinates(latitude=latitude_enter, longitude=longitude_enter)
+            db.session.add(coordinates_enter)
+            db.session.commit()     
+            return redirect(url_for("start_page"))
+    """
     @app.route("/get_ip", methods=["GET"])
     def get_ip():   
         return jsonify({'ip': request.remote_addr}), 200  
@@ -45,5 +56,5 @@ def create_app():
             return latitude, longitude
         except Exception:
             return "Unknown"
-    
+    """
     return app

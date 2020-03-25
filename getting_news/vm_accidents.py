@@ -21,7 +21,7 @@ class vm_accidents():
             result_news = []
             for item in news_found:
 
-                title = item.find('a').text.strip('\n\t ')
+                title = item.find('a').text.replace('\xa0\n', '').strip('\n\t ')
                 link = URL + item.find('a')['href']
                 published = item.find('ul')
                 time = published.find('li', class_='articles-list__info articles-list__info--time').text.strip('\n\t')

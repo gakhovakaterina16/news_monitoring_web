@@ -1,11 +1,14 @@
 from bs4 import BeautifulSoup
+from datetime import datetime
 
 from get_html import get_html
 
-class m24():
-    def get_feed():
-        URL = 'https://www.m24.ru'
-        html = get_html(URL + '/news')
+class M24(object):
+    def __init__(self):
+        self.url = 'https://www.m24.ru'
+
+    def get_feed(self):
+        html = get_html(self.url + '/news')
         if html:
             soup = BeautifulSoup(html, 'html.parser')
             news_found = soup.find('div', class_='b-materials-list b-list_infinity').find('ul').find_all('li')
@@ -15,13 +18,14 @@ class m24():
                 news = item.find('p', class_='b-materials-list__title b-materials-list__title_news')
 
                 title = news.find('a').text.strip('\n\t')
-                link = URL + news.find('a')['href']
+                link = self.url + news.find('a')['href']
                 time = news.find('span').text
+                date = datetime.now().strftime('%d.%m.%Y')
 
-                result_news.append((title, link, time))
+                result_news.append({'title': title, 'link': link, 'time': time, 'date': date})
             return result_news
             
-    def get_post(url):
+    def get_post(self, url):
         html = get_html(url)
         if html:
             soup = BeautifulSoup(html, 'html.parser')
@@ -33,11 +37,14 @@ class m24():
 
 
 if __name__ == "__main__":
+    m24 = M24()
+    
     news = m24.get_feed()
     for item in news:
         print('----------------------')
         print(item)
         print()
-        print(m24.get_post(item[1]))
+        print(m24.get_post(item['link']))
     print('----------------------')
     print(len(news))
+    

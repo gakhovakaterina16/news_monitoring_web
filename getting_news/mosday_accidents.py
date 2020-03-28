@@ -2,10 +2,12 @@ from bs4 import BeautifulSoup
 
 from get_html import get_html
 
-class mosday_accidents():
-    def get_feed():
-        URL = 'http://mosday.ru/news'
-        html = get_html(URL + '/tags.php?accident')
+class Mosday_accidents(object):
+    def __init__(self):
+        self.url = 'http://mosday.ru/news'
+
+    def get_feed(self):
+        html = get_html(self.url + '/tags.php?accident')
         if html:
             soup = BeautifulSoup(html, 'html.parser')
             news_found = soup.find('body')
@@ -15,18 +17,19 @@ class mosday_accidents():
             news_found = news_found.find('table')
             news_found = news_found.find_all('font', face="Arial", size="2", color="#666666", style="font-size:13px")
 
+            print(news_found)
+
             result_news = []
             for item in news_found:
                 title = item.find('font', size="3", style="font-size:16px").find('a').text
-                link = URL + '/' + item.find('font', size="3", style="font-size:16px").find('a')['href']
+                link = self.url + '/' + item.find('font', size="3", style="font-size:16px").find('a')['href']
                 date = item.find('b').text
                 time = item.text[12:16]
                 
-                result_news.append((title, link, time, date))
+                result_news.append({'title': title, 'link': link, 'time': time, 'date': date})
             return result_news
-                   
 
-    def get_post(url):
+    def get_post(self, url):
         html = get_html(url)
         if html:
             soup = BeautifulSoup(html, 'html.parser')
@@ -38,18 +41,19 @@ class mosday_accidents():
 
             news_text = ''
             for block in text_blocks:
-                news_text += block.text + '\n'
+                news_text += block.text.replace('\xa0\n', '').strip('\n\t ') + '\n'
             return news_text
 
 
 if __name__ == "__main__":
-    news = mosday_accidents.get_feed()
-    
+    mosday_accidents = Mosday_accidents()
+
+    news = mosday_accidents.get_feed()    
     for item in news:
         print('----------------------')
         print(item)
         print()
-        print(mosday_accidents.get_post(item[1]))
+        print(mosday_accidents.get_post(item['link']))
     print('----------------------')
     print(len(news))
     

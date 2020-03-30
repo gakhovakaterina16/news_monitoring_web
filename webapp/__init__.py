@@ -1,8 +1,10 @@
 from flask import Flask, render_template, flash, redirect, url_for, request, jsonify
 
-from webapp.forms import dtForm, coordinatesForm
+from flask_migrate import Migrate
 
-from webapp.model import db, UserDT, UserCoordinates
+from webapp.forms import dtcoorForm
+
+from webapp.model import db, UserDTCoor
 
 from datetime import datetime
 
@@ -12,35 +14,28 @@ def create_app():
     app = Flask(__name__)
     app.config.from_pyfile("config.py")
     db.init_app(app)
+    migrate = Migrate(app, db)
 
     @app.route("/")
     def start_page():
         title = "Новости"
         header1 = "Отслеживание новостей в указанной локации"
-        dt_form = dtForm()
-        return render_template("index.html", page_title=title, header1=header1, form=dt_form)
+        dtcoor_form = dtcoorForm()
+        return render_template("index.html", page_title=title, header1=header1, form=dtcoor_form)
        
-    @app.route("/process_dt", methods=["POST"])
-    def process_dt():
-        form = dtForm()
+    @app.route("/process_dtcoor", methods=["POST"])
+    def process_dtcoor():
+        form = dtcoorForm()
         if form.validate_on_submit:
             dt_start_enter = datetime.strptime(form.dt_start.raw_data[0],"%Y-%m-%dT%H:%M")
             dt_finish_enter = datetime.strptime(form.dt_finish.raw_data[0],"%Y-%m-%dT%H:%M")
-            dt_enter = UserDT(dt_start=dt_start_enter, dt_finish=dt_finish_enter)
-            db.session.add(dt_enter)
+            latitude_enter = form.latitude.raw_data[0]
+            longitude_enter = form.longitude.raw_data[0]
+            dtcoor_enter = UserDTCoor(dt_start=dt_start_enter, dt_finish=dt_finish_enter, latitude=latitude_enter, longitude=longitude_enter)
+            db.session.add(dtcoor_enter)
             db.session.commit()     
             return redirect(url_for("start_page"))
     
-    @app.route("/process_coordinates", methods=["POST"])
-    def process_coordinates():
-        form = coordinatesForm()
-        if form.validate_on_submit:
-            latitude_enter = form.latitude.raw_data[0]
-            longitude_enter = form.longitude.raw_data[0]
-            coordinates_enter = UserCoordinates(latitude=latitude_enter, longitude=longitude_enter)
-            db.session.add(coordinates_enter)
-            db.session.commit()     
-            return redirect(url_for("start_page"))
     """
     @app.route("/get_ip", methods=["GET"])
     def get_ip():   

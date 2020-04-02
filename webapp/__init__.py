@@ -2,6 +2,8 @@ from flask import Flask, render_template, flash, redirect, url_for, request, jso
 
 from flask_migrate import Migrate
 
+import flask_admin as admin
+
 from webapp.forms import dtcoorForm
 
 from webapp.model import db, UserDTCoor
@@ -10,8 +12,19 @@ from datetime import datetime
 
 import requests
 
+# Create custom admin view
+class MyAdminView(admin.BaseView):
+    @admin.expose('/')
+    def index(self):
+        return self.render('myadmin.html')
+
+class AnotherAdminView(admin.BaseView):
+    @admin.expose('/')
+    def index(self):
+        return self.render('anotheradmin.html') 
+
 def create_app():
-    app = Flask(__name__)
+    app = Flask(__name__, template_folder="templates")
     app.config.from_pyfile("config.py")
     db.init_app(app)
     migrate = Migrate(app, db)
@@ -35,7 +48,7 @@ def create_app():
             db.session.add(dtcoor_enter)
             db.session.commit()     
             return redirect(url_for("start_page"))
-    
+
     """
     @app.route("/get_ip", methods=["GET"])
     def get_ip():   
@@ -53,3 +66,10 @@ def create_app():
             return "Unknown"
     """
     return app
+
+app = create_app()
+
+# Create admin interface
+admin = admin.Admin(name="CMS", template_mode='bootstrap3')
+admin.add_view(MyAdminView(name="view1", category='view1'))
+admin.init_app(app)

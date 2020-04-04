@@ -15,7 +15,7 @@
         <h1>{{  header1  }}</h1>
     </div>
     <div class="col-12">
-      <form action="{{ url_for('process_dt') }}" method="POST">
+      <form action="{{ url_for('process_dtcoor') }}" method="POST">
         {{ form.hidden_tag() }}
         <p>
           {{ form.dt_start.label }}<br>
@@ -25,25 +25,20 @@
           {{ form.dt_finish.label }}<br>
           <input type="datetime-local" id="dt_finish" name="dt_finish">
         </p>
+        <p>
+          {{ form.latitude.label }} <br>
+          {{ form.latitude }}
+        </p>
+        <p>
+          {{ form.longitude.label }} <br>
+          {{ form.longitude }}
+        </p>
         <p>{{ form.submit() }}</p>
       </form>
     </div>
     <div class="col-12">
-      <form action="{{ url_for('process_coordinates') }}" method="POST">
-        <p>
-          <label>Широта:</label><br>  
-          <input type="text" id="latitude" name="latitude">
-        </p>
-        <p>
-          <label>Долгота:</label><br>  
-          <input type="text" id="longitude" name="longitude">
-        </p>
-        <p>
-          <input type="submit" value="Отправить">
-        </p>
-      </form>
+      <a href="/admin/">Click me to get to Admin!</a>
     </div>
- 
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->

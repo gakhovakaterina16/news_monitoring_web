@@ -20,7 +20,7 @@ class VM_accidents(object):
                 link = self.url + item.find('a')['href']
                 published = item.find('ul')
                 time = published.find('li', class_='articles-list__info articles-list__info--time').text.strip('\n\t')
-                # кривое приведение даты к общему виду (имеем '25 марта' --> '25.03.2020')
+                # приведение даты к общему виду (имеем '25 марта' --> '25.03.2020')
                 # 'str(int(' нужно для того, если однозначное число отобразится как 1, а не 01
                 day = str(int(published.find('li', class_='articles-list__info articles-list__info--date').text.strip('\n\t')[0:2]))
                 month_and_year = datetime.now().strftime('.%m.%Y')

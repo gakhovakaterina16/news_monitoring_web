@@ -17,7 +17,7 @@ class Mosday_accidents(object):
             news_found = news_found.find('table')
             news_found = news_found.find_all('font', face="Arial", size="2", color="#666666", style="font-size:13px")
 
-            print(news_found)
+            #print(news_found)
 
             result_news = []
             for item in news_found:

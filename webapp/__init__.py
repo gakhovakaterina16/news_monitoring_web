@@ -2,26 +2,26 @@ from flask import Flask, render_template, flash, redirect, url_for, request, jso
 
 from flask_migrate import Migrate
 
-import flask_admin as admin
+from flask_admin import helpers as admin_helpers
+
+import flask_admin
+
+from flask_security import Security, SQLAlchemyUserDatastore, \
+    UserMixin, RoleMixin, login_required, current_user
+
+from flask_security.utils import encrypt_password
+
+from flask_admin.contrib import sqla
+
+from webapp.views import MyAdminView
 
 from webapp.forms import dtcoorForm
 
-from webapp.model import db, UserDTCoor
+from webapp.model import db, UserDTCoor, Role, User
 
 from datetime import datetime
 
 import requests
-
-# Create custom admin view
-class MyAdminView(admin.BaseView):
-    @admin.expose('/')
-    def index(self):
-        return self.render('myadmin.html')
-
-class AnotherAdminView(admin.BaseView):
-    @admin.expose('/')
-    def index(self):
-        return self.render('anotheradmin.html') 
 
 def create_app():
     app = Flask(__name__, template_folder="templates")
@@ -67,9 +67,23 @@ def create_app():
     """
     return app
 
+
 app = create_app()
 
+# Setup Flask-Security
+user_datastore = SQLAlchemyUserDatastore(db, User, Role)
+security = Security(app, user_datastore)
+
+"""
 # Create admin interface
 admin = admin.Admin(name="CMS", template_mode='bootstrap3')
 admin.add_view(MyAdminView(name="view1", category='view1'))
 admin.init_app(app)
+"""
+# Create admin
+admin = flask_admin.Admin(
+    app,
+    'CMS: Auth',
+    base_template='my_master.html',
+    template_mode='bootstrap3',
+)

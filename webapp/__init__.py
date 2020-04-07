@@ -13,7 +13,7 @@ from flask_security.utils import encrypt_password
 
 from flask_admin.contrib import sqla
 
-from webapp.views import MyAdminView
+from webapp.views import MyModelView
 
 from webapp.forms import dtcoorForm
 
@@ -87,3 +87,18 @@ admin = flask_admin.Admin(
     base_template='my_master.html',
     template_mode='bootstrap3',
 )
+
+# Add model views
+admin.add_view(MyModelView(Role, db.session))
+admin.add_view(MyModelView(User, db.session))
+
+# define a context processor for merging flask-admin's template context into the
+# flask-security views.
+@security.context_processor
+def security_context_processor():
+    return dict(
+        admin_base_template=admin.base_template,
+        admin_view=admin.index_view,
+        h=admin_helpers,
+        get_url=url_for
+    )

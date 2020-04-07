@@ -10,9 +10,10 @@ class UserDTCoor(db.Model):
     dt_finish = db.Column(db.DateTime, nullable=False)
     latitude = db.Column(db.String, nullable=False)
     longitude = db.Column(db.String, nullable=False)
-   
+
     def __repr__(self):
-        return "<UserDTCoor {} {}>".format(self.dt_start, self.dt_finish, self.latitude, self.longitude)
+        return "<UserDTCoor {} {}>".format(self.dt_start, self.dt_finish,
+                                           self.latitude, self.longitude)
 
 
 # Define models
@@ -27,7 +28,7 @@ class Role(db.Model, RoleMixin):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(80), unique=True)
     description = db.Column(db.String(255))
-    
+
     def __repr__(self):
         return "<Role {}>".format(self.name)
 

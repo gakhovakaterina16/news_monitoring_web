@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 from datetime import datetime
 
-from get_html import get_html
+from utils import get_html
 
 class M24_accidents(object):
     def __init__(self):

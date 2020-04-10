@@ -4,6 +4,7 @@ from pprint import pprint
 from natasha import AddressExtractor
 from natasha.markup import show_markup, show_json
 
+from utils import extract_address, get_coordinates
 from m24_accidents import M24_accidents
 from mosday_accidents  import Mosday_accidents
 from vm_accidents import VM_accidents
@@ -51,13 +52,16 @@ if __name__ == "__main__":
         facts = [item.fact.as_json for item in matches]
 
         if len(facts) > 0:
-            item['location'] = facts
+            item['location'] = {'address': extract_address(facts),
+                                'coordinates': [get_coordinates(address) for address in extract_address(facts)]}
         else:
             pseudo_db.remove(item)
 
     for item in pseudo_db:
         print('----------------------')
-        print(item['title'], item['link'], item['time'], item['date'])
+        print(item['title'])
+        print(item['link'])
+        print(item['time'], item['date'])
         print()
         print(item['text'])
         print()

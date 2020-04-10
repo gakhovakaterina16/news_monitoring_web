@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 
-from get_html import get_html
+from utils import get_html
 
 class Mosday_accidents(object):
     def __init__(self):

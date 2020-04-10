@@ -5,7 +5,7 @@ from natasha import AddressExtractor
 from natasha.markup import show_markup, show_json
 
 from m24_accidents import M24_accidents
-from mosday_accidents import Mosday_accidents
+from mosday_accidents  import Mosday_accidents
 from vm_accidents import VM_accidents
 
 
@@ -20,10 +20,16 @@ def get_news(source_name):
         ScrapeClass = news_sites.get(source_name)
         source = ScrapeClass()
         results = source.get_feed()
+        extractor = AddressExtractor()
         for val in results:
             val['text'] = source.get_post(val['link'])
+            matches = extractor(val['text'])
+            spans = [item.span for item in matches]
+            facts = [item.fact.as_json for item in matches]
+            if facts:
+                val['location'] = facts
+                site_all_news.append(val)
             #print(val)
-            site_all_news.append(val)
         return site_all_news
     except KeyError:
         print("Данный источник недоступен")
@@ -47,7 +53,14 @@ if __name__ == "__main__":
         if len(facts) > 0:
             item['location'] = facts
         else:
-            # что-то не так, ничего не удаляется
             pseudo_db.remove(item)
 
-    print(pseudo_db)
+    for item in pseudo_db:
+        print('----------------------')
+        print(item['title'], item['link'], item['time'], item['date'])
+        print()
+        print(item['text'])
+        print()
+        print(item['location'])
+    print('----------------------')
+    print(len(pseudo_db))

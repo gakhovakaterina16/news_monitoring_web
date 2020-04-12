@@ -52,6 +52,9 @@ if __name__ == "__main__":
         facts = [item.fact.as_json for item in matches]
 
         if len(facts) > 0:
+            #print(facts)
+            #print('----------------------')
+            #item['location'] = facts
             item['location'] = {'address': extract_address(facts),
                                 'coordinates': [get_coordinates(address) for address in extract_address(facts)]}
         else:
@@ -66,5 +69,6 @@ if __name__ == "__main__":
         print(item['text'])
         print()
         print(item['location'])
+    
     print('----------------------')
     print(len(pseudo_db))

@@ -49,7 +49,7 @@ def extract_address(facts):
             except KeyError:
                 continue
         # проверяем, что это адрес, а не знаменитая 'площадь возгорания'
-        if re.match(r'([А-Я]|[\d*\- А-Я])', address):
+        if re.match(r'([А-Я]|\d*\-[а-я] [А-Я])', address):
             address_list.append('Москва, ' + address)
         # избавляемся от дублекатов адресов
         list(set(address_list))

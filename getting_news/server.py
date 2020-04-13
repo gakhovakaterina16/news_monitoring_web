@@ -1,5 +1,5 @@
 from celery import Celery
-from pprint import pprint
+import psycopg2
 
 from natasha import AddressExtractor
 from natasha.markup import show_markup, show_json
@@ -8,6 +8,7 @@ from utils import extract_address, get_coordinates
 from m24_accidents import M24_accidents
 from mosday_accidents  import Mosday_accidents
 from vm_accidents import VM_accidents
+import settings
 
 
 news_sites = {'m24.ru': M24_accidents, 'mosday.ru': Mosday_accidents, 'vm.ru': VM_accidents}
@@ -24,43 +25,61 @@ def get_news(source_name):
         extractor = AddressExtractor()
         for val in results:
             val['text'] = source.get_post(val['link'])
-            matches = extractor(val['text'])
-            spans = [item.span for item in matches]
-            facts = [item.fact.as_json for item in matches]
-            if facts:
-                val['location'] = facts
-                site_all_news.append(val)
-            #print(val)
+            if val['text']:
+                matches = extractor(val['text'])
+                spans = [item.span for item in matches]
+                facts = [item.fact.as_json for item in matches]
+                if facts:
+                    val['location'] = facts
+                    site_all_news.append(val)
         return site_all_news
     except KeyError:
         print("Данный источник недоступен")
         return False
 
 if __name__ == "__main__":
+    # соединяемся с БД
+    con = psycopg2.connect(
+        database=settings.DB_NAME,
+        user=settings.DB_USERNAME,
+        password=settings.DB_PASSWORD,
+        host=settings.DB_HOST,
+        port=settings.DB_PORT
+    )
+
     # Загружаем новости во временное хранилище
-    pseudo_db = []
+    temp_news_list = []
     for key in news_sites.keys():
-        pseudo_db += get_news(key)
+        temp_news_list += get_news(key)
 
     # Инициализируем Наташу    
     extractor = AddressExtractor()
     
-    for item in pseudo_db:
+    for item in temp_news_list:
         text = item['text']
         matches = extractor(text)
         spans = [item.span for item in matches]
         facts = [item.fact.as_json for item in matches]
-
-        if len(facts) > 0:
-            #print(facts)
-            #print('----------------------')
-            #item['location'] = facts
-            item['location'] = {'address': extract_address(facts),
-                                'coordinates': [get_coordinates(address) for address in extract_address(facts)]}
+        address = extract_address(facts)
+        # проверяем длину address, а не facts во избежание нахождения только площади возгорания
+        if len(address) > 0:
+            item['location'] = {'address': address,
+                                'street': address[0].split(',')[1]}
+                                #'coordinates': [get_coordinates(address) for address in extract_address(facts)]}
+            # если улица уже есть в БД, то берем координаты улицы
+            #############
+            # если нет - ищем координаты
+            item['location']['coordinates'] = [get_coordinates(address) for address in address]
+            # делаем запись в БД
         else:
-            pseudo_db.remove(item)
+            temp_news_list.remove(item)
+            # не делаем запись в БД
 
-    for item in pseudo_db:
+    # заканчиваем работу с БД
+    con.commit()
+    con.close()
+
+    for item in temp_news_list:
         print('----------------------')
         print(item['title'])
         print(item['link'])
@@ -69,6 +88,9 @@ if __name__ == "__main__":
         print(item['text'])
         print()
         print(item['location'])
+
     
     print('----------------------')
-    print(len(pseudo_db))
+    n = len(temp_news_list)
+    print(len(temp_news_list))
+    

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from celery import Celery
 import psycopg2
 
@@ -46,6 +48,7 @@ if __name__ == "__main__":
         host=settings.DB_HOST,
         port=settings.DB_PORT
     )
+    cur = con.cursor()
 
     # Загружаем новости во временное хранилище
     temp_news_list = []
@@ -66,11 +69,24 @@ if __name__ == "__main__":
             item['location'] = {'address': address,
                                 'street': address[0].split(',')[1]}
                                 #'coordinates': [get_coordinates(address) for address in extract_address(facts)]}
-            # если улица уже есть в БД, то берем координаты улицы
-            #############
-            # если нет - ищем координаты
+            # если улицы нет в БД, то ищем координаты
             item['location']['coordinates'] = [get_coordinates(address) for address in address]
+            # если нет - ищем координаты
+            #############
             # делаем запись в БД
+            dt_str = item['time'] + ' ' + item['date']
+            query = '''INSERT INTO {table_name} (title, src, published, post, address, street, latitude, longitude) 
+                            VALUES ('{title}', '{src}', '{published}', '{post}', '{address}', '{street}', {lat}, {lon})
+                    '''.format(table_name=settings.DB_TABLE_NAME, 
+                                title=item['title'],
+                                src=item['link'],
+                                published=datetime.strptime(dt_str, '%H:%M %d.%m.%Y'),
+                                post=item['text'],
+                                address=item['location']['address'][0],
+                                street=item['location']['street'],
+                                lat=item['location']['coordinates'][0][0],
+                                lon=item['location']['coordinates'][0][1])
+            cur.execute(query)
         else:
             temp_news_list.remove(item)
             # не делаем запись в БД

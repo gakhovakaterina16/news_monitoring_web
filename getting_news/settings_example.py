@@ -1,0 +1,6 @@
+DB_NAME = "local_news_app_db"
+DB_USERNAME = "postgres"
+DB_PASSWORD = "your_password"
+DB_HOST = "127.0.0.1"
+DB_PORT = "5432"
+DB_TABLE_NAME = "news_locations"

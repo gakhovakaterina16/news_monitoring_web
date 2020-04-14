@@ -40,7 +40,7 @@ def get_news(source_name):
         return False
 
 if __name__ == "__main__":
-    # соединяемся с БД
+    # Соединяемся с БД
     con = psycopg2.connect(
         database=settings.DB_NAME,
         user=settings.DB_USERNAME,
@@ -49,6 +49,14 @@ if __name__ == "__main__":
         port=settings.DB_PORT
     )
     cur = con.cursor()
+
+    # Загружаем список ссылок, чтобы сверяться с ним и не добавлять лишнего
+    query = "SELECT src FROM news_locations"
+    cur.execute(query)
+    res = cur.fetchall()
+    links = []
+    for r in res:
+        links.append(r[0])    
 
     # Загружаем новости во временное хранилище
     temp_news_list = []
@@ -59,21 +67,30 @@ if __name__ == "__main__":
     extractor = AddressExtractor()
     
     for item in temp_news_list:
-        text = item['text']
-        matches = extractor(text)
+        # если ссылка есть в БД, то пропускаем
+        if item['link'] in links:
+            continue
+        # анализируем текст на предмет наличия адресов
+        matches = extractor(item['text'])
         spans = [item.span for item in matches]
         facts = [item.fact.as_json for item in matches]
         address = extract_address(facts)
         # проверяем длину address, а не facts во избежание нахождения только площади возгорания
         if len(address) > 0:
             item['location'] = {'address': address,
-                                'street': address[0].split(',')[1]}
-                                #'coordinates': [get_coordinates(address) for address in extract_address(facts)]}
+                                'street': address[0].split(',')[1].strip()}
+            query = "SELECT COUNT(*) FROM news_locations WHERE street = '{}'".format(item['location']['street'])
+            street_in_database = bool(cur.execute(query)) 
             # если улицы нет в БД, то ищем координаты
-            item['location']['coordinates'] = [get_coordinates(address) for address in address]
-            # если нет - ищем координаты
-            #############
-            # делаем запись в БД
+            if not street_in_database:
+                item['location']['coordinates'] = [get_coordinates(address) for address in address]
+            # если есть - не ищем
+            else:
+                query = "SELECT latitude, longitude FROM news_locations where street = '{}'".format(item['location']['street'])
+                cur.execute(query)
+                item['location']['coordinates'] = [cur.fetchone()]
+            
+            # Делаем запись в БД
             dt_str = item['time'] + ' ' + item['date']
             query = '''INSERT INTO {table_name} (title, src, published, post, address, street, latitude, longitude) 
                             VALUES ('{title}', '{src}', '{published}', '{post}', '{address}', '{street}', {lat}, {lon})
@@ -88,13 +105,15 @@ if __name__ == "__main__":
                                 lon=item['location']['coordinates'][0][1])
             cur.execute(query)
         else:
+            # удаляем новости, в которых нет адресов
             temp_news_list.remove(item)
-            # не делаем запись в БД
 
     # заканчиваем работу с БД
     con.commit()
     con.close()
 
+    '''
+    # вывод новостей на экран
     for item in temp_news_list:
         print('----------------------')
         print(item['title'])
@@ -109,4 +128,5 @@ if __name__ == "__main__":
     print('----------------------')
     n = len(temp_news_list)
     print(len(temp_news_list))
+    '''
     

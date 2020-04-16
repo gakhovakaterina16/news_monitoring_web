@@ -74,22 +74,4 @@ if __name__ == "__main__":
     # заканчиваем работу с БД
     con.commit()
     con.close()
-
-    '''
-    # вывод новостей на экран
-    for item in temp_news_list:
-        print('----------------------')
-        print(item['title'])
-        print(item['link'])
-        print(item['time'], item['date'])
-        print()
-        print(item['text'])
-        print()
-        print(item['location'])
-
-    
-    print('----------------------')
-    n = len(temp_news_list)
-    print(len(temp_news_list))
-    '''
     

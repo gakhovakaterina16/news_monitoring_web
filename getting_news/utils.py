@@ -1,7 +1,8 @@
 from datetime import datetime
 import re
 import requests
-#from collections import OrderedDict
+
+from natasha import AddressExtractor
 
 import settings
 
@@ -109,3 +110,23 @@ def find_address_in_news(item, extractor, cur):
         for_record = True
     return for_record
         
+
+def get_news(news_sites, source_name, extractor):
+    site_all_news = []
+    try:
+        ScrapeClass = news_sites.get(source_name)
+        source = ScrapeClass()
+        results = source.get_feed()
+        for val in results:
+            val['text'] = source.get_post(val['link'])
+            if val['text']:
+                matches = extractor(val['text'])
+                spans = [item.span for item in matches]
+                facts = [item.fact.as_json for item in matches]
+                if facts:
+                    val['location'] = facts
+                    site_all_news.append(val)
+        return site_all_news
+    except KeyError:
+        print("Данный источник недоступен")
+        return False

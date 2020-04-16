@@ -1,6 +1,7 @@
 <<<<<<< HEAD
 __pycache__/
 =======
+/get_news/settings.py
 /.vscode
 __pycache__
 work.py

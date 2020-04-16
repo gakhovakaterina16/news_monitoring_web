@@ -1,7 +1,9 @@
+from datetime import datetime
 import re
 import requests
-from collections import OrderedDict
-from pprint import pprint
+#from collections import OrderedDict
+
+import settings
 
 def get_html(url):
     try:
@@ -10,6 +12,7 @@ def get_html(url):
         return response.text
     except(requests.RequestException, ValueError):
         return False
+
 
 def get_coordinates(address):
         url = 'http://search.maps.sputnik.ru/search/addr?q=' + address
@@ -23,6 +26,7 @@ def get_coordinates(address):
                     lons.append(r['result']['address'][i]['features'][j]['geometry']['geometries'][0]['coordinates'][0])
                     lats.append(r['result']['address'][i]['features'][j]['geometry']['geometries'][0]['coordinates'][1])
         return sum(lats)/len(lats), sum(lons)/len(lons)
+
 
 def extract_address(facts):
     '''
@@ -56,12 +60,52 @@ def extract_address(facts):
     return address_list
 
 
-if __name__ == "__main__":
-    #o = [OrderedDict([('parts', [OrderedDict([('name', 'Юных Ленинцев'), ('type','улица')]), OrderedDict([('number', '54'), ('type', 'дом')]), OrderedDict([('type', 'строение')])])])]
-    o = [OrderedDict([('parts', [OrderedDict([('name', '1-й Карачаровской'), ('type', 'улица')]), OrderedDict([('number', '8'), ('type', 'дом')])])]), OrderedDict([('parts', [OrderedDict([('name', 'возгорания составляет'), ('type', 'площадь')]), OrderedDict([('number', '950')])])])]
-    address_list = extract_address(o)
-    print(address_list)
-    #print('-------------------------------')
+def links_list(cur):
+    query = "SELECT src FROM news_locations"
+    cur.execute(query)
+    res = cur.fetchall()
+    links = []
+    for r in res:
+        links.append(r[0])
+    return links
 
 
+def write_to_db(item, cur):
+    dt_str = item['time'] + ' ' + item['date']
+    query = '''INSERT INTO {table_name} (title, src, published, post, address, street, latitude, longitude) 
+                    VALUES ('{title}', '{src}', '{published}', '{post}', '{address}', '{street}', {lat}, {lon})
+            '''.format(table_name=settings.DB_TABLE_NAME, 
+                        title=item['title'],
+                        src=item['link'],
+                        published=datetime.strptime(dt_str, '%H:%M %d.%m.%Y'),
+                        post=item['text'],
+                        address=item['location']['address'][0],
+                        street=item['location']['street'],
+                        lat=item['location']['coordinates'][0][0],
+                        lon=item['location']['coordinates'][0][1])
+    cur.execute(query)
+
+
+def find_address_in_news(item, extractor, cur):
+    for_record = False
+    matches = extractor(item['text'])
+    spans = [subject.span for subject in matches]
+    facts = [subject.fact.as_json for subject in matches]
+    address = extract_address(facts)
+    # проверяем длину address, а не facts во избежание нахождения только площади возгорания
+    if len(address) > 0:
+        item['location'] = {'address': address,
+                            'street': address[0].split(',')[1].strip()}
+        # если улицы нет в БД, то ищем координаты
+        query = "SELECT COUNT(*) FROM news_locations WHERE street = '{}'".format(item['location']['street'])
+        street_in_database = bool(cur.execute(query)) 
+        if not street_in_database:
+            item['location']['coordinates'] = [get_coordinates(address) for address in address]
+        # если есть - не ищем
+        else:
+            query = "SELECT latitude, longitude FROM news_locations where street = '{}'".format(item['location']['street'])
+            cur.execute(query)
+            item['location']['coordinates'] = [cur.fetchone()]
+        for_record = True
+    return for_record
         

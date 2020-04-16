@@ -12,7 +12,7 @@ class Mosday_accidents(object):
             soup = BeautifulSoup(html, 'html.parser')
             news_found = soup.find('body')
             news_found = news_found.find('table', width="100%", height="500", cellpadding="0", cellspacing="0", border="0")
-            news_found = news_found.find_all('td')[27] # здесь и далее время от времени сбивается индекс нужного элемента, раньше был 29
+            news_found = news_found.find_all('td')[29] # здесь и далее время от времени сбивается индекс нужного элемента, раньше был 29, потом 27
             news_found = news_found.find('table')
             news_found = news_found.find('table')
             news_found = news_found.find_all('font', face="Arial", size="2", color="#666666", style="font-size:13px")
@@ -34,7 +34,7 @@ class Mosday_accidents(object):
             soup = BeautifulSoup(html, 'html.parser')
             text_blocks = soup.find('body')
             text_blocks = text_blocks.find('table', width="100%", height="500", cellpadding="0", cellspacing="0", border="0")
-            text_blocks = text_blocks.find_all('td')[27] # тот же индекс
+            text_blocks = text_blocks.find_all('td')[29] # тот же индекс
             text_blocks = text_blocks.find('div').find('table').find('article').find('div', itemprop="text")
             text_blocks = text_blocks.find_all('p')
             #print(text_blocks)
@@ -56,5 +56,4 @@ if __name__ == "__main__":
         print(mosday_accidents.get_post(item['link']))
     print('----------------------')
     print(len(news))
-    #print(mosday_accidents.get_post('http://mosday.ru/news/item.php?2282246&tags=accident'))
     

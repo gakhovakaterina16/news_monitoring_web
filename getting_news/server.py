@@ -1,12 +1,10 @@
-from datetime import datetime
-
 from celery import Celery
 import psycopg2
 
 from natasha import AddressExtractor
 from natasha.markup import show_markup, show_json
 
-from utils import extract_address, get_coordinates
+from utils import find_address_in_news, links_list, write_to_db
 from m24_accidents import M24_accidents
 from mosday_accidents  import Mosday_accidents
 from vm_accidents import VM_accidents
@@ -51,12 +49,7 @@ if __name__ == "__main__":
     cur = con.cursor()
 
     # Загружаем список ссылок, чтобы сверяться с ним и не добавлять лишнего
-    query = "SELECT src FROM news_locations"
-    cur.execute(query)
-    res = cur.fetchall()
-    links = []
-    for r in res:
-        links.append(r[0])    
+    links = links_list(cur)    
 
     # Загружаем новости во временное хранилище
     temp_news_list = []
@@ -71,39 +64,9 @@ if __name__ == "__main__":
         if item['link'] in links:
             continue
         # анализируем текст на предмет наличия адресов
-        matches = extractor(item['text'])
-        spans = [item.span for item in matches]
-        facts = [item.fact.as_json for item in matches]
-        address = extract_address(facts)
-        # проверяем длину address, а не facts во избежание нахождения только площади возгорания
-        if len(address) > 0:
-            item['location'] = {'address': address,
-                                'street': address[0].split(',')[1].strip()}
-            query = "SELECT COUNT(*) FROM news_locations WHERE street = '{}'".format(item['location']['street'])
-            street_in_database = bool(cur.execute(query)) 
-            # если улицы нет в БД, то ищем координаты
-            if not street_in_database:
-                item['location']['coordinates'] = [get_coordinates(address) for address in address]
-            # если есть - не ищем
-            else:
-                query = "SELECT latitude, longitude FROM news_locations where street = '{}'".format(item['location']['street'])
-                cur.execute(query)
-                item['location']['coordinates'] = [cur.fetchone()]
-            
+        if find_address_in_news(item, extractor, cur):            
             # Делаем запись в БД
-            dt_str = item['time'] + ' ' + item['date']
-            query = '''INSERT INTO {table_name} (title, src, published, post, address, street, latitude, longitude) 
-                            VALUES ('{title}', '{src}', '{published}', '{post}', '{address}', '{street}', {lat}, {lon})
-                    '''.format(table_name=settings.DB_TABLE_NAME, 
-                                title=item['title'],
-                                src=item['link'],
-                                published=datetime.strptime(dt_str, '%H:%M %d.%m.%Y'),
-                                post=item['text'],
-                                address=item['location']['address'][0],
-                                street=item['location']['street'],
-                                lat=item['location']['coordinates'][0][0],
-                                lon=item['location']['coordinates'][0][1])
-            cur.execute(query)
+            write_to_db(item, cur)
         else:
             # удаляем новости, в которых нет адресов
             temp_news_list.remove(item)

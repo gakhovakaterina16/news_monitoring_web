@@ -10,11 +10,9 @@ from mosday_accidents  import Mosday_accidents
 from vm_accidents import VM_accidents
 import settings
 
+celery_app = Celery('server', broker='redis://localhost:6379/0')
 
-app = Celery('server', broker='redis://localhost:6379/0')
-
-
-@app.task
+@celery_app.task
 def main():
     news_sites = {'m24.ru': M24_accidents, 'mosday.ru': Mosday_accidents, 'vm.ru': VM_accidents}
 
@@ -55,5 +53,10 @@ def main():
     con.commit()
     con.close()
 
+@celery_app.on_after_configure.connect
+def setup_periodic_tasks(sender, **kwargs):
+    sender.add_periodic_task(crontab(minute='*1'), main.s())
+    #sender.add_periodic_task(crontab(hour='*24'), main.s())
+
 if __name__ == "__main__":
-    main()
+    main.delay()

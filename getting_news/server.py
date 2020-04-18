@@ -11,6 +11,13 @@ from vm_accidents import VM_accidents
 import settings
 
 celery_app = Celery('server', broker='redis://localhost:6379/0')
+#celery_app.conf.beat_schedule = {
+#    'add-every-30-seconds': {
+#        'task': 'server.main',
+#        'schedule': 30.0
+#    },
+#}
+celery_app.conf.timezone = 'UTC'
 
 @celery_app.task
 def main():
@@ -55,8 +62,7 @@ def main():
 
 @celery_app.on_after_configure.connect
 def setup_periodic_tasks(sender, **kwargs):
-    sender.add_periodic_task(crontab(minute='*1'), main.s())
-    #sender.add_periodic_task(crontab(hour='*24'), main.s())
+    sender.add_periodic_task(crontab(hour=0), main.s())
 
 if __name__ == "__main__":
     main.delay()

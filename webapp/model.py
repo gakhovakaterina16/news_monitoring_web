@@ -1,11 +1,11 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_security import UserMixin, RoleMixin
 from flask import current_app
-from flask_login import AnonymousUserMixin
 
 db = SQLAlchemy()
 
 
+# модель для дат и координат, которые вводит пользователь
 class UserDTCoor(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     dt_start = db.Column(db.DateTime, nullable=False)
@@ -28,6 +28,7 @@ roles_users = db.Table(
 '''
 
 
+# описание привилегий
 class Permission:
     FOLLOW = 0x01
     COMMENT = 0x02
@@ -36,6 +37,7 @@ class Permission:
     ADMINISTER = 0x80
 
 
+# описание модели Role
 class Role(db.Model, RoleMixin):
     __tablename__ = 'roles'
     id = db.Column(db.Integer(), primary_key=True)
@@ -47,6 +49,7 @@ class Role(db.Model, RoleMixin):
     def __repr__(self):
         return "<Role {}>".format(self.name)
 
+# создание ролей в бд
     @staticmethod
     def insert_roles():
         roles = {
@@ -68,7 +71,7 @@ class Role(db.Model, RoleMixin):
             db.session.add(role)
         db.session.commit()
 
-
+# описание модели User
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(64), unique=True, index=True)
@@ -79,6 +82,7 @@ class User(db.Model, UserMixin):
     def __repr__(self):
         return "<User {}>".format(self.email)
 
+# присваивание роли
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
         if self.role is None:
@@ -91,13 +95,6 @@ class User(db.Model, UserMixin):
         return self.role is not None and \
          (self.role.permissions & permissions) == permissions
 
+# проверка наличия административных привилегий
     def is_administrator(self):
         return self.can(Permission.ADMINISTER)
-
-
-class AnonymousUser(AnonymousUserMixin):
-    def can(self, permissions):
-        return False
-
-    def is_administrator(self):
-        return False

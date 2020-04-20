@@ -14,10 +14,7 @@ class MyAdminView(admin.BaseView):
 # Create customized model view class
 class MyModelView(sqla.ModelView):
     def is_accessible(self):
-        return (current_user.is_active and
-                current_user.is_authenticated and
-                current_user.has_role('superuser')
-                )
+        return current_user.is_authenticated
 
     def _handle_view(self, name, **kwargs):
         """

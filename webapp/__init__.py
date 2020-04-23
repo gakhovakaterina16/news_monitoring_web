@@ -104,7 +104,7 @@ def security_context_processor():
 def add_roles_and_admin():
 
     with app.app_context():
-        if User.query.filter_by(email='admin').count() == 0 or Role.query.filter_by(name='superuser') == 0:
+        if User.query.filter_by(email='admin').count() == 0 and Role.query.filter_by(name='superuser') == 0:
             super_user_role = Role(name='superuser')
             user_role = Role(name='user')
             db.session.add(super_user_role)

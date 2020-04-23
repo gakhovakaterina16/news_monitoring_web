@@ -69,12 +69,6 @@ app = create_app()
 user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 security = Security(app, user_datastore)
 
-"""
-# Create admin interface
-admin = admin.Admin(name="CMS", template_mode='bootstrap3')
-admin.add_view(MyAdminView(name="view1", category='view1'))
-admin.init_app(app)
-"""
 # Create admin
 admin = flask_admin.Admin(
     app,
@@ -98,3 +92,31 @@ def security_context_processor():
         h=admin_helpers,
         get_url=url_for
     )
+
+# добавляем две роли: user и superuser, - в БД, таблица role.
+# добавляем пользоватлея admin, с ролью superuser, который может
+# задавать роли всем зарегистрированным пользователям.
+# у такого пользователя email - admin, пароль - admin.
+# всё это добавляется, если в таблице role нет роли superuser или
+# если в таблице user нет пользователя с email = admin
+
+
+def add_roles_and_admin():
+
+    with app.app_context():
+        if User.query.filter_by(email='admin').count() == 0 or Role.query.filter_by(name='superuser') == 0:
+            super_user_role = Role(name='superuser')
+            user_role = Role(name='user')
+            db.session.add(super_user_role)
+            db.session.add(user_role)
+            db.session.commit()
+            user_datastore.create_user(
+                first_name='admin',
+                email='admin',
+                password='admin',
+                roles=[super_user_role, ]
+            )
+            db.session.commit()
+
+
+add_roles_and_admin()

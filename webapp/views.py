@@ -12,9 +12,14 @@ class MyAdminView(admin.BaseView):
 
 
 # Create customized model view class
+# даём возможность увидеть админку, где можно задавать роли,
+# пользователю с ролью superuser
 class MyModelView(sqla.ModelView):
     def is_accessible(self):
-        return current_user.is_authenticated
+        return (current_user.is_active and
+                current_user.is_authenticated and
+                current_user.has_role('superuser')
+                )
 
     def _handle_view(self, name, **kwargs):
         """

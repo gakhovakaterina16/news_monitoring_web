@@ -23,5 +23,3 @@ SECURITY_REGISTER_URL = "/register/"
 SECURITY_POST_LOGIN_VIEW = "/admin/"
 SECURITY_POST_LOGOUT_VIEW = "/admin/"
 SECURITY_POST_REGISTER_VIEW = "/admin/"
-
-FLASKY_ADMIN = 'gakhovakaterina16@gmail.com'

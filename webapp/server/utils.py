@@ -97,14 +97,6 @@ def find_address_in_news(item, extractor):
     return for_record
 
 def return_news_to_user(dt_start, dt_finish, latitude, longitude):
-    news = News.query.all()
+    #news = News.query.all()
+    news = News.query.filter(News.date_and_time>dt_start, News.date_and_time<dt_finish).all()
     return news
-
-if __name__ == "__main__":
-    dt_start = datetime.now()
-    dt_finish = dt_start
-    latitude = 55.835606
-    longitude = 37.52639
-
-    result = return_news_to_user(dt_start, dt_finish, latitude, longitude)
-    print(result)

@@ -18,10 +18,11 @@
                 <div>
                     {{ news.text }}
                 </div>
-                <a href={{ news.link }}>Источник</a>
-                {{ news.date_and_time.strftime('%H:%M %d.%m.%Y') }}
+                <a href={{ news.link }}>Источник</a><br>
+                {{ news.date_and_time.strftime('%H:%M %d.%m.%Y') }}<br>
+                Координаты: {{ '{:.7}'.format(news.lat) }}, {{ '{:.7}'.format(news.lon) }}<br>
             </div>
-            <br>
+            <hr>
         {% endfor %}
     </div>
     

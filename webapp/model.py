@@ -50,3 +50,15 @@ class User(db.Model, UserMixin):
 
     def __str__(self):
         return self.email
+
+# описание модели News
+class News(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(255))
+    link = db.Column(db.String(255))
+    date_and_time = db.Column(db.DateTime, index=True)
+    text = db.Column(db.String(15000))
+    address = db.Column(db.String(255))
+    street = db.Column(db.String(50))
+    lat = db.Column(db.Float(255))
+    lon = db.Column(db.Float(255))

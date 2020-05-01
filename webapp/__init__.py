@@ -8,6 +8,7 @@ from webapp.views import MyModelView
 from webapp.forms import dtcoorForm
 from webapp.model import db, UserDTCoor, Role, User
 from webapp.server.tasks import main
+from webapp.server.utils import return_news_to_user
 
 from datetime import datetime
 
@@ -36,13 +37,27 @@ def create_app():
                                                 "%Y-%m-%dT%H:%M")
             latitude_enter = form.latitude.raw_data[0]
             longitude_enter = form.longitude.raw_data[0]
+
+            # Ищем в БД нужные новости
+            result_news = return_news_to_user(dt_start_enter, dt_finish_enter, latitude_enter, longitude_enter)
+
             dtcoor_enter = UserDTCoor(dt_start=dt_start_enter,
                                       dt_finish=dt_finish_enter,
                                       latitude=latitude_enter,
                                       longitude=longitude_enter)
             db.session.add(dtcoor_enter)
             db.session.commit()
-            return redirect(url_for("start_page"))
+            if result_news:
+                title = "Новости"
+                return render_template("result.html", page_title=title, news_list=result_news)
+            else:
+                return redirect(url_for("nodata"))
+
+    @app.route("/nodata")
+    def nodata():
+        title = "Новости"
+        header1 = "По данному запросу ничего не найдено :("
+        return render_template("nodata.html", page_title=title, header1=header1)
             
     @app.route("/parse")
     def parse():

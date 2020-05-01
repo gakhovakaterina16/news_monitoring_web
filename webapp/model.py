@@ -62,3 +62,6 @@ class News(db.Model):
     street = db.Column(db.String)
     lat = db.Column(db.Numeric)
     lon = db.Column(db.Numeric)
+
+    def __repr__(self):
+        return "<news record {}>".format(self.id)

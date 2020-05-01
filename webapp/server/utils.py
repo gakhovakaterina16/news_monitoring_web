@@ -1,10 +1,11 @@
+from datetime import datetime
 import re
-
 import requests
 
 from .parsers.m24_accidents import M24_accidents
 from .parsers.mosday_accidents  import Mosday_accidents
 from .parsers.vm_accidents import VM_accidents
+from webapp.model import News
 
 
 def get_news(news_sites, source_name, extractor):
@@ -94,3 +95,16 @@ def find_address_in_news(item, extractor):
         #    item['location']['coordinates'] = [cur.fetchone()]
         for_record = True
     return for_record
+
+def return_news_to_user(dt_start, dt_finish, latitude, longitude):
+    news = News.query.all()
+    return news
+
+if __name__ == "__main__":
+    dt_start = datetime.now()
+    dt_finish = dt_start
+    latitude = 55.835606
+    longitude = 37.52639
+
+    result = return_news_to_user(dt_start, dt_finish, latitude, longitude)
+    print(result)

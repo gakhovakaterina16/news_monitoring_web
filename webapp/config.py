@@ -1,8 +1,7 @@
 import os
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, '..',
-                                                      'webapp.db')
+SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://postgres:rzQgZ6Ftwv@127.0.0.1:5432/news_db"
 
 SECRET_KEY = "fahkffdgjl45&*HJK^GIYJH&JHG#$%DUJNKHJ"
 

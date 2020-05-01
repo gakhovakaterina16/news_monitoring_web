@@ -54,11 +54,11 @@ class User(db.Model, UserMixin):
 # описание модели News
 class News(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(255))
-    link = db.Column(db.String(255))
+    title = db.Column(db.String)
+    link = db.Column(db.String)
     date_and_time = db.Column(db.DateTime, index=True)
-    text = db.Column(db.String(15000))
-    address = db.Column(db.String(255))
-    street = db.Column(db.String(50))
-    lat = db.Column(db.Float(255))
-    lon = db.Column(db.Float(255))
+    text = db.Column(db.String)
+    address = db.Column(db.String)
+    street = db.Column(db.String)
+    lat = db.Column(db.Numeric)
+    lon = db.Column(db.Numeric)

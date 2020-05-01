@@ -42,6 +42,7 @@ def create_app():
             db.session.add(dtcoor_enter)
             db.session.commit()
             return redirect(url_for("start_page"))
+            
 
     """
     @app.route("/get_ip", methods=["GET"])
@@ -100,7 +101,7 @@ def security_context_processor():
 # всё это добавляется, если в таблице role нет роли superuser или
 # если в таблице user нет пользователя с email = admin
 
-
+@app.before_first_request
 def add_roles_and_admin():
 
     with app.app_context():
@@ -117,6 +118,3 @@ def add_roles_and_admin():
                 roles=[super_user_role, ]
             )
             db.session.commit()
-
-
-add_roles_and_admin()

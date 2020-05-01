@@ -1,8 +1,10 @@
 import re
 
-from parsers.m24_accidents import M24_accidents
-from parsers.mosday_accidents  import Mosday_accidents
-from parsers.vm_accidents import VM_accidents
+import requests
+
+from .parsers.m24_accidents import M24_accidents
+from .parsers.mosday_accidents  import Mosday_accidents
+from .parsers.vm_accidents import VM_accidents
 
 
 def get_news(news_sites, source_name, extractor):
@@ -84,7 +86,7 @@ def find_address_in_news(item, extractor):
         #query = "SELECT COUNT(*) FROM news_locations WHERE street = '{}'".format(item['location']['street'])
         #street_in_database = bool(cur.execute(query)) 
         #if not street_in_database:
-        #    item['location']['coordinates'] = [get_coordinates(address) for address in address]
+        item['location']['coordinates'] = [get_coordinates(address) for address in address]
         # если есть - не ищем
         #else:
         #    query = "SELECT latitude, longitude FROM news_locations where street = '{}'".format(item['location']['street'])

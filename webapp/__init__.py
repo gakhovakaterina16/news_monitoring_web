@@ -7,6 +7,7 @@ from flask_security import Security, SQLAlchemyUserDatastore
 from webapp.views import MyModelView
 from webapp.forms import dtcoorForm
 from webapp.model import db, UserDTCoor, Role, User
+from webapp.server.tasks import main
 
 from datetime import datetime
 
@@ -43,6 +44,11 @@ def create_app():
             db.session.commit()
             return redirect(url_for("start_page"))
             
+    @app.route("/parse")
+    def parse():
+        main()
+        return redirect(url_for("start_page"))
+
 
     """
     @app.route("/get_ip", methods=["GET"])
